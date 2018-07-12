@@ -413,20 +413,6 @@ for url in urls {
     }
     content = content.replacingOccurrences(of: "\n", with: "")
 
-    let bodyStart = try! NSRegularExpression(pattern: "<body",
-                                           options: .caseInsensitive)
-    let bodyEnd = try! NSRegularExpression(pattern: "</body>",
-                                             options: .caseInsensitive)
-
-//    let bsm = bodyStart.matches(in: content,
-//                      options: NSRegularExpression.MatchingOptions(rawValue: 0),
-//                      range: NSRange(location: 0, length: content.count))
-
-//    let bse = bodyEnd.matches(in: content,
-//                              options: NSRegularExpression.MatchingOptions.withTransparentBounds,
-//                              range: NSRange(location: 0, length: content.count))
-
-
     var st = Date()
     let bodyS = content.range(of: "<body")
     let bodyE = content.range(of: "</body>")
@@ -440,6 +426,7 @@ for url in urls {
         if !body.isEmpty {
 
             st = Date()
+
             var paragraphExp = try! NSRegularExpression(pattern: "(<p>)(.+?)(</p>)",
                                                         options: .caseInsensitive)
 
@@ -469,7 +456,58 @@ for url in urls {
             if tmp.isEmpty {
                 print("OH NO EMPTY AGAIN 😱")
             }
-            result = tmp
+            result = matches.isEmpty ? body : tmp
+
+            st = Date()
+            let style = try! NSRegularExpression(pattern: "(<style)(.+?)(</style>)",
+                                                 options: .caseInsensitive)
+            matches = style.matches(in: result,
+                                    options: .reportCompletion,
+                                    range: NSRange(location: 0, length: result.count))
+
+            tmp = ""
+            var start = result.startIndex
+            for m in matches {
+                let r = m.range
+                let s = content.index(content.startIndex, offsetBy: r.lowerBound)
+                let e = content.index(content.startIndex, offsetBy: r.upperBound)
+                tmp += String(result[start..<s])
+                start = e
+            }
+            print("⏱ STYLE TAKES: \(fabs(st.timeIntervalSinceNow)) MATCHES: \(matches.count)")
+
+            if tmp.isEmpty && !matches.isEmpty {
+                print("OH NO EMPTY AGAIN 😱")
+            }
+
+            result = matches.isEmpty ? result : tmp
+
+
+            st = Date()
+            let script = try! NSRegularExpression(pattern: "(<script)(.+?)(</script>)",
+                                                 options: .caseInsensitive)
+            matches = script.matches(in: result,
+                                    options: .reportCompletion,
+                                    range: NSRange(location: 0, length: result.count))
+
+            tmp = ""
+            start = result.startIndex
+            for m in matches {
+                let r = m.range
+                let s = content.index(content.startIndex, offsetBy: r.lowerBound)
+                let e = content.index(content.startIndex, offsetBy: r.upperBound)
+                tmp += String(result[start..<s])
+                start = e
+            }
+            print("⏱ SCRIPT TAKES: \(fabs(st.timeIntervalSinceNow)) MATCHES: \(matches.count)")
+
+            if tmp.isEmpty && !matches.isEmpty {
+                print("OH NO EMPTY AGAIN 😱")
+            }
+
+            result = matches.isEmpty ? result : tmp
+
+
             st = Date()
             let htmlTag = try! NSRegularExpression(pattern: "<[^>]+>",
                                                    options: .caseInsensitive)
@@ -479,7 +517,7 @@ for url in urls {
                                       range: NSRange(location: 0, length: result.count))
 
             tmp = ""
-            var start = result.startIndex
+            start = result.startIndex
             for m in matches {
                 let r = m.range
                 let s = content.index(content.startIndex, offsetBy: r.lowerBound)
