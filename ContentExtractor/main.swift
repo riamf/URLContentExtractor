@@ -2,27 +2,6 @@
 
 import Foundation
 
-
-extension String {
-    subscript (bounds: CountableClosedRange<Int>) -> String {
-        let start = index(startIndex, offsetBy: bounds.lowerBound)
-        let end = index(startIndex, offsetBy: bounds.upperBound)
-        return String(self[start...end])
-    }
-
-    subscript (bounds: CountableRange<Int>) -> String {
-        let start = index(startIndex, offsetBy: bounds.lowerBound)
-        let end = index(startIndex, offsetBy: bounds.upperBound)
-        return String(self[start..<end])
-    }
-
-    subscript (bounds: Range<Int>) -> String {
-        let start = index(startIndex, offsetBy: bounds.lowerBound)
-        let end = index(startIndex, offsetBy: bounds.upperBound)
-        return String(self[start..<end])
-    }
-}
-
 let urls = ["https://qz.com/1116991/a-biologist-believes-that-trees-speak-a-language-we-can-learn/",
             "https://ocaml.github.io/ocamlunix/index.html",
             "http://www.pkc.io/blog/five-red-flags-signaling-your-rebuild-will-fail/",
@@ -412,6 +391,8 @@ for url in urls {
         print("😱 CANNOT PARSE \(url)")
     }
     content = content.replacingOccurrences(of: "\n", with: "")
+
+    let c = ContentExtractor().extract(from: content, logTime: true)
 
     var st = Date()
     let bodyS = content.range(of: "<body")
